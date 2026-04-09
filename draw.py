@@ -28,7 +28,7 @@ for time, pid, id_, event, attrs in rows:
     attrs_dict = dict(pair.split("=") for pair in attrs.split(",")) if attrs else {}
     groups.setdefault((pid, id_), []).append((time, event, attrs_dict))
 
-plt.figure(figsize=(14, 5))
+plt.figure(figsize=(14, max(2, len(groups) * 0.6)))
 
 all_events = {e for _, events in groups.items() for _, e, _ in events}
 event_colors = {e: plt.cm.tab20(i % 20) for i, e in enumerate(sorted(all_events))}
@@ -59,6 +59,7 @@ for i, ((pid, id_), events) in enumerate(groups.items()):
             ha="center",
             va="bottom",
             fontsize=8,
+            clip_on=True,
         )
 
 
@@ -79,6 +80,6 @@ plt.yticks(
 plt.xlabel("Time")
 plt.title("Event Timeline")
 plt.grid(axis="both", linestyle="--", alpha=0.5)
-
+plt.ylim(-(len(groups) - 0.5), 0.5)
 plt.tight_layout()
 plt.show()
