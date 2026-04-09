@@ -17,7 +17,7 @@ FROM events e
 JOIN related r ON e.pid = r.pid AND e.id = r.id
 LEFT JOIN attributes a ON a.pid = e.pid AND a.id = e.id AND a.event = e.event
 GROUP BY e.time, e.pid, e.id, e.event
-ORDER BY e.pid, e.id, e.time
+ORDER BY e.time, e.pid, e.id
 """)
 rows = cur.fetchall()
 conn.close()
@@ -28,7 +28,7 @@ for time, pid, id_, event, attrs in rows:
     attrs_dict = dict(pair.split("=") for pair in attrs.split(",")) if attrs else {}
     groups.setdefault((pid, id_), []).append((time, event, attrs_dict))
 
-plt.figure(figsize=(14, 3))
+plt.figure(figsize=(14, 5))
 
 all_events = {e for _, events in groups.items() for _, e, _ in events}
 event_colors = {e: plt.cm.tab20(i % 20) for i, e in enumerate(sorted(all_events))}
@@ -66,8 +66,12 @@ plt.yticks(
     [-i for i in range(len(groups))],
     [
         "pid={} id={} {}".format(
-            pid, id_,
-            " ".join(f"{k}={v}" for k, v in {k: v for _, _, a in events for k, v in a.items()}.items())
+            pid,
+            id_,
+            " ".join(
+                f"{k}={v}"
+                for k, v in {k: v for _, _, a in events for k, v in a.items()}.items()
+            ),
         )
         for (pid, id_), events in groups.items()
     ],
